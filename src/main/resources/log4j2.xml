@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 主要配置为error日志与debug日志分别打印文件，errorLog按照分钟存档，debugLog按照日志文件大小存档，最多保存10个。 -->
+<configuration status="OFF" monitorInterval="30" packages="com.c4tman.play.logPrint.custom">
+    <Properties>
+        <Property name="log.path">.</Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss} sessionId[%X{sessionId}] [%thread] %-5level %logger{36} -
+            %msg%n
+        </Property>
+    </Properties>
+
+
+    <appenders>
+        <!--Appender 1. 输出到Console，指定输出格式和过滤器等级为ERROR -->
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--<PatternLayout pattern="${LOG_PATTERN}"/>-->
+
+            <CustomPatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%traceId] [%t] %-5level %logger{1.} - %msg%n</pattern>
+                <replaces>
+                    <replace regex='(IdNo|CertId|CertID|idCard)(":")(\d{6})\d{8,11}(\w{1})(")'
+                             replacement="$1$2$3**************$4$5"/>
+                    <!--<replace regex='(mobile|phone|phoneNo|tel)(":")(\d{3})\d{4}(\d{4})(")'-->
+                             <!--replacement="$1$2$3****$4"/>-->
+                </replaces>
+            </CustomPatternLayout>
+
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!--Appender 2. 输出到滚动保存的文件, 触发保存日志文件的条件是日志文件大于3KB，只保存最新的10个日志-->
+        <!--<RollingRandomAccessFile name="debugLog" fileName="${log.path}/debug.log" filePattern="${log.path}/debug-%i.log">-->
+        <!--<ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>-->
+        <!--<PatternLayout pattern="${LOG_PATTERN}"/>-->
+        <!--&lt;!&ndash;日志保留天数&ndash;&gt;-->
+        <!--&lt;!&ndash;<MaxHistory>30</MaxHistory>&ndash;&gt;-->
+        <!--<SizeBasedTriggeringPolicy size="3KB"/>-->
+        <!--&lt;!&ndash; DefaultRolloverStrategy 中的参数max，可以限制 SizeBasedTriggeringPolicy中size超出后，只保留max个存档&ndash;&gt;-->
+        <!--<DefaultRolloverStrategy max="10"/>-->
+        <!--</RollingRandomAccessFile>-->
+
+        <!--Appender 3. 输出到滚动保存的文件, 触发保存日志文件的条件是每分钟第一次的日志事件。ERROR日志是按分钟产生日志 -->
+        <!--<RollingFile name="errorLog" fileName="${log.path}/error.log"-->
+        <!--filePattern="${log.path}/error-%d{yyyy-MM-dd_HH-mm}.log">-->
+        <!--&lt;!&ndash;临界值过滤器&ndash;&gt;-->
+        <!--<ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>-->
+        <!--<PatternLayout pattern="[%-5level][%d{yyyy-MM-dd HH:mm:ss}][%C:%F:%L] - %m%n"/>-->
+        <!--<TimeBasedTriggeringPolicy/>-->
+        <!--</RollingFile>-->
+
+    </appenders>
+
+    <loggers>
+        <root level="trace">
+            <appender-ref ref="Console"/>
+            <!--<appender-ref ref="debugLog"/>-->
+            <!--<appender-ref ref="errorLog"/>-->
+        </root>
+        <!--防止输出两边-->
+        <logger name="com.google" level="debug" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+    </loggers>
+</configuration>   
